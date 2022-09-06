@@ -18,9 +18,6 @@ def lambda_handler(event, context):
     
     bucket = event['Records'][0]['s3']['bucket']['name']
     key = urllib.parse.unquote(event['Records'][0]['s3']['object']['key'])
-    #bucket = 'team-1-skillstorm-bronze'
-    #key = 'measurements/year=2022/month=08/test'
-    #key = 'measurements/year=2022/month=08/team-1-openaq-delivery-stream-9-2022-08-31-15-26-22-c809eac3-2ad1-4d22-9573-fa6d824bd124'
     obj = client.get_object(Bucket=bucket, Key=key)
     data = obj['Body'].read()
     try:
@@ -30,7 +27,6 @@ def lambda_handler(event, context):
         s = str(data, 'utf-8')
         data = io.StringIO(s)
         df = pd.read_json(data, lines=True)
-    #'''    
     #clean the data
     df = df[df['coordinates'].notna()]
     df = df[df['date'].notna()]
@@ -67,7 +63,6 @@ def lambda_handler(event, context):
     name = key.split('.')[0]
     #save into silver layer
     client.put_object(Bucket='team-1-skillstorm-silver', Key=f'{name}.parquet', Body=out_buffer.getvalue())
-    #'''
     return {
         'statusCode': 200,
     }
